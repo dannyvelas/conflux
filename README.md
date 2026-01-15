@@ -44,7 +44,7 @@ Use this library if you want something that:
 
 ## Conflicts
 
-- Sometimes there are two sources that define different values for the same configuration key. Conflux has two rules for resolving conflicts:
+- Sometimes there are two sources that define different values for the same configuration key. Conflux has the following rules for resolving conflicts:
   - When initializing `ConfigMux`, `Reader`s should be passed as arguments from lowest to highest priority. For example, in the usage above, conflicting values in `BitwardenSecretReader` will override env values, which will in turn override file values.
   - When initializing `YAMLFileReader`, paths should be passed as arguments from lowest to highest priority. The path with the lowest priority is the one that is passed as the first argument. The path with the next-lowest priority is the one that is passed-in as the first functional option: `WithPath("some-file-here.yml")`, and so on.
   - If you pass-in a directory to `YAMLFileReader`, `YAMLFileReader` will read the files in that directory recursively in lexicographic order. That is to say that a file `A` that falls lexicographically before another file `B`, will have lower priority that `B`.
