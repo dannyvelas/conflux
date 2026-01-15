@@ -51,7 +51,7 @@ func (r *yamlFileReader) Read() (ReadResult, error) {
 
 		maps.Copy(configMap, pathConfig)
 	}
-	return NewSimpleReadResult(configMap), nil
+	return NewDiagnosticReadResult(configMap, diagnostics), nil
 }
 
 func (r *yamlFileReader) getConfigByInfo(info fs.FileInfo, path string) (map[string]string, error) {

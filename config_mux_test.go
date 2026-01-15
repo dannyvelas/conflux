@@ -131,7 +131,6 @@ func TestConfigMux_Error(t *testing.T) {
 		name          string
 		fs            fs.FS
 		env           []string
-		hostName      string
 		expectedError error
 	}{
 		{
@@ -141,7 +140,6 @@ func TestConfigMux_Error(t *testing.T) {
 				"config/proxmox.yml": {Data: []byte("node_cidr_address: 10.0.0.50/24\n")},
 			},
 			env:           []string{},
-			hostName:      "proxmox",
 			expectedError: ErrInvalidFields,
 		},
 	}
@@ -156,7 +154,45 @@ func TestConfigMux_Error(t *testing.T) {
 
 			target := testConfig{}
 			if _, err := Unmarshal(r, &target); !errors.Is(err, tc.expectedError) {
-				t.Errorf("expected error to be %v, got %v", tc.expectedError, err)
+				t.Fatalf("expected error to be %v, got %v", tc.expectedError, err)
+			}
+		})
+	}
+}
+
+func TestConfigMux_Diagnostics(t *testing.T) {
+	cases := []struct {
+		name          string
+		fs            fs.FS
+		env           []string
+		expectedError error
+	}{
+		{
+			name: "missing file",
+			fs: fstest.MapFS{
+				"config/proxmox.yml": {Data: []byte("ssh_port: 17031\nssh_public_key_path: \"~/.ssh/id_ed25519.pub\"\ngateway_address: 10.0.0.1\nphysical_nic: \"enx6c1ff7135975\"\nauto_update_reboot_time: \"05:00\"\nnode_cidr_address: 10.0.0.50/24\n")},
+			},
+			env:           []string{},
+			expectedError: ErrInvalidFields,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewConfigMux(
+				WithYAMLFileReader("config/all.yml", WithPath("config/proxmox.yml"), WithFileSystem(tc.fs)),
+				WithEnvReader(WithEnviron(tc.env)),
+				WithBitwardenSecretReader(),
+			)
+
+			target := testConfig{}
+			diagnostics, err := Unmarshal(r, &target)
+			if err != nil {
+				t.Fatalf("expected error to be nil, got %v", err)
+			}
+
+			if _, ok := diagnostics["config/all.yml"]; !ok {
+				t.Fatalf("expected diagnostics[\"config/all.yml\"] to be present but was not: %v", diagnostics)
 			}
 		})
 	}
