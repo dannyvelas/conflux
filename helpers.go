@@ -56,9 +56,6 @@ func fromMap(src map[string]string, dst any) error {
 
 		// get tag value
 		configTag := queryForTags(field, "conflux", []string{"json"})
-		if configTag == "" {
-			continue
-		}
 
 		// If the tag exists as a key in our source map, set the field
 		if val, exists := normalizedSrc[strings.ToLower(configTag)]; exists {
@@ -92,9 +89,6 @@ func getTagToFieldMap(v any, tagName string, fallbackTags ...string) (map[string
 		field := rt.Field(i)
 
 		foundTag := queryForTags(field, tagName, fallbackTags)
-		if foundTag == "" {
-			return nil, fmt.Errorf("field %s is missing a tag", field.Name)
-		}
 
 		tagToFieldMap[foundTag] = reflectField{field, rv.Field(i)}
 	}
@@ -108,11 +102,11 @@ func queryForTags(field reflect.StructField, tagName string, fallbackTags []stri
 		if foundTag != "" {
 			return foundTag
 		} else if i == len(fallbackTags) {
-			return ""
+			break
 		}
 		tagName = fallbackTags[i]
 	}
-	return ""
+	return field.Name
 }
 
 func mergeMaps[K comparable, V any](m1, m2 map[K]V) map[K]V {
