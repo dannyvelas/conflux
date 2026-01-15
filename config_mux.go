@@ -36,13 +36,13 @@ func (r *configMux) Read() (ReadResult, error) {
 	return NewDiagnosticReadResult(configMap, allDiagnostics), nil
 }
 
-// WithFileReader adds a file reader to the config mux
-func WithFileReader(path string, opts ...func(*fileReader)) func(*configMux) {
+// WithYAMLFileReader adds a yaml file reader to the config mux
+func WithYAMLFileReader(path string, opts ...func(*yamlFileReader)) func(*configMux) {
 	return func(configMux *configMux) {
 		configMux.readerFns = append(
 			configMux.readerFns,
 			func(_ map[string]string) Reader {
-				return NewFileReader(path, opts...)
+				return NewYAMLFileReader(path, opts...)
 			},
 		)
 	}

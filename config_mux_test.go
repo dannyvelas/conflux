@@ -96,7 +96,7 @@ func TestConfigMux_Success(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewConfigMux(
-				WithFileReader("config/all.yml", WithPath("config/proxmox.yml"), WithFileSystem(tc.fs)),
+				WithYAMLFileReader("config/all.yml", WithPath("config/proxmox.yml"), WithFileSystem(tc.fs)),
 				WithEnvReader(WithEnviron(tc.env)),
 				WithBitwardenSecretReader(),
 			)
@@ -149,7 +149,7 @@ func TestConfigMux_Error(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewConfigMux(
-				WithFileReader("config/all.yml", WithPath("config/proxmox.yml"), WithFileSystem(tc.fs)),
+				WithYAMLFileReader("config/all.yml", WithPath("config/proxmox.yml"), WithFileSystem(tc.fs)),
 				WithEnvReader(WithEnviron(tc.env)),
 				WithBitwardenSecretReader(),
 			)

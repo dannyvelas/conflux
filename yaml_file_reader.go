@@ -12,28 +12,28 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-var _ Reader = (*fileReader)(nil)
+var _ Reader = (*yamlFileReader)(nil)
 
-type fileReader struct {
+type yamlFileReader struct {
 	fileSystem fs.FS
 	paths      []string
 }
 
-// NewFileReader creates a new reader which gets key-value pairs from YML files from specified directories/files
-func NewFileReader(path string, opts ...func(*fileReader)) *fileReader {
-	fileReader := fileReader{
+// NewYAMLFileReader creates a new reader which gets key-value pairs from YML files from specified directories/files
+func NewYAMLFileReader(path string, opts ...func(*yamlFileReader)) *yamlFileReader {
+	yamlFileReader := yamlFileReader{
 		fileSystem: os.DirFS("."),
 		paths:      []string{path},
 	}
 
 	for _, opt := range opts {
-		opt(&fileReader)
+		opt(&yamlFileReader)
 	}
 
-	return &fileReader
+	return &yamlFileReader
 }
 
-func (r *fileReader) Read() (ReadResult, error) {
+func (r *yamlFileReader) Read() (ReadResult, error) {
 	configMap, diagnostics := make(map[string]string), make(map[string]string)
 	for _, path := range r.paths {
 		info, err := fs.Stat(r.fileSystem, path)
@@ -54,7 +54,7 @@ func (r *fileReader) Read() (ReadResult, error) {
 	return NewSimpleReadResult(configMap), nil
 }
 
-func (r *fileReader) getConfigByInfo(info fs.FileInfo, path string) (map[string]string, error) {
+func (r *yamlFileReader) getConfigByInfo(info fs.FileInfo, path string) (map[string]string, error) {
 	mode := info.Mode()
 	switch {
 	case mode.IsDir():
@@ -66,7 +66,7 @@ func (r *fileReader) getConfigByInfo(info fs.FileInfo, path string) (map[string]
 	}
 }
 
-func (r *fileReader) readDirectory(dir string) (map[string]string, error) {
+func (r *yamlFileReader) readDirectory(dir string) (map[string]string, error) {
 	dirConfig := make(map[string]string)
 
 	err := fs.WalkDir(r.fileSystem, dir, func(path string, d fs.DirEntry, err error) error {
@@ -98,7 +98,7 @@ func (r *fileReader) readDirectory(dir string) (map[string]string, error) {
 	return dirConfig, nil
 }
 
-func (r *fileReader) readFile(file string) (map[string]string, error) {
+func (r *yamlFileReader) readFile(file string) (map[string]string, error) {
 	fileConfig := make(map[string]string)
 	data, err := fs.ReadFile(r.fileSystem, file)
 	if err != nil {
@@ -110,17 +110,17 @@ func (r *fileReader) readFile(file string) (map[string]string, error) {
 	return fileConfig, nil
 }
 
-// WithFileSystem allows specifying a custom file system for the fileReader
+// WithFileSystem allows specifying a custom file system for the yamlFileReader
 // By default, it uses the OS file system, os.DirFS(".")
-func WithFileSystem(fileSystem fs.FS) func(*fileReader) {
-	return func(fileReader *fileReader) {
-		fileReader.fileSystem = fileSystem
+func WithFileSystem(fileSystem fs.FS) func(*yamlFileReader) {
+	return func(yamlFileReader *yamlFileReader) {
+		yamlFileReader.fileSystem = fileSystem
 	}
 }
 
 // WithPath allows specifying an additional path (file or directory) to read config from
-func WithPath(path string) func(*fileReader) {
-	return func(fileReader *fileReader) {
-		fileReader.paths = append(fileReader.paths, path)
+func WithPath(path string) func(*yamlFileReader) {
+	return func(yamlFileReader *yamlFileReader) {
+		yamlFileReader.paths = append(yamlFileReader.paths, path)
 	}
 }
