@@ -1,4 +1,4 @@
-package main
+package conflux
 
 // Reader is the interface that must be implemented
 // if you want to define your own source of reading

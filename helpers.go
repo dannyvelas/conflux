@@ -1,4 +1,4 @@
-package main
+package conflux
 
 import (
 	"fmt"
@@ -55,7 +55,7 @@ func fromMap(src map[string]string, dst any) error {
 		}
 
 		// get tag value
-		configTag := queryForTags(field, "labctl", []string{"json"})
+		configTag := queryForTags(field, "conflux", []string{"json"})
 		if configTag == "" {
 			continue
 		}

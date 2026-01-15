@@ -1,4 +1,4 @@
-package main
+package conflux
 
 var _ Reader = mapReader{}
 

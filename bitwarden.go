@@ -1,4 +1,4 @@
-package main
+package conflux
 
 type bitwardenConfig struct {
 	APIURL         string `json:"bitwarden_api_url"`

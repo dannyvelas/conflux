@@ -1,4 +1,4 @@
-package main
+package conflux
 
 import (
 	"errors"
@@ -26,7 +26,7 @@ func validateStruct(v any) (map[string]string, error) {
 	diagnostics := make(map[string]string)
 	valid := true
 
-	tagToFieldMap, err := getTagToFieldMap(v, "labctl", "json")
+	tagToFieldMap, err := getTagToFieldMap(v, "conflux", "json")
 	if err != nil {
 		return nil, fmt.Errorf("error getting tag to field map: %v", err)
 	}
