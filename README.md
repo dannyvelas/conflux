@@ -42,6 +42,12 @@ Use this library if you want something that:
 - Has flexible validation logic. If your struct has some specific validation rules, `conflux` will run them if you define a receiver with the following signature: `Validate(map[string]string) bool`.
 - Has flexible struct-filling logic. If your struct needs to fill-in additional fields after the required fields have been filled, `conflux` will fill those fields for you if you define a receiver with the following signature: `FillInKeys() error`.
 
+## Name
+
+I chose `conflux` for this library because it's Latin for "flowing together".
+
+This workd kind-of describes the logic this library has of merging multiple configuration sources into a single source of truth.
+
 ## Installation
 
 ```sh
