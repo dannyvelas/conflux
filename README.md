@@ -34,9 +34,9 @@ if errors.Is(err, conflux.ErrInvalidFields) {
 ## Why use this library instead of Viper, Koanf, etc?
 
 Use this library if you want something that:
-- Is light (751 SLOC)
-- Supports reading from Bitwarden Secrets
-- Built-in validation. The `required` tag allows `conflux` to give you an exact report of the configurations that were found and missing. This report can be printed as a table for a user-friendly experience.
+- Is light (751 SLOC).
+- Supports reading from Bitwarden Secrets.
+- Has built-in validation. The `required` tag allows `conflux` to give you an exact report of the configurations that were found and missing. This report can be printed as a table for a user-friendly experience.
 - Is easily extensible. You can easily your own `Reader`s that read from any source you wish.
 - Has flexible initialization logic. `Reader`s can be initialized lazily. This allows us to initialize a `Reader` with a map of configs that have been read so far. The `BitwardenSecretReader` actually uses the configs found by `YAMLFileReader` and `EnvReader` to authenticate to Bitwarden.
 - Has flexible validation logic. If your struct has some specific validation rules, `conflux` will run them if you define a receiver with the following signature: `Validate(map[string]string) bool`.
