@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"maps"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -32,56 +34,65 @@ func NewFileReader(path string, opts ...func(*fileReader)) *fileReader {
 }
 
 func (r *fileReader) Read() (ReadResult, error) {
-	m := make(map[string]string)
+	configMap, diagnostics := make(map[string]string), make(map[string]string)
 	for _, path := range r.paths {
 		info, err := fs.Stat(r.fileSystem, path)
-		if err != nil {
-			return nil, fmt.Errorf("error getting info for path(%s): %v", path, err)
+		if errors.Is(err, fs.ErrNotExist) {
+			diagnostics[path] = "Skipped: Not Found"
+			continue
+		} else if err != nil {
+			return nil, fmt.Errorf("error getting info for path (%s): %v", path, err)
 		}
 
-		mode := info.Mode()
-		switch {
-		case mode.IsDir():
-			dirConfig, err := r.readDirectory(path)
-			if err != nil {
-				return nil, err
-			}
-			maps.Copy(m, dirConfig)
-		case mode.IsRegular():
-			fileConfig, err := r.readFile(path)
-			if err != nil {
-				return nil, err
-			}
-			maps.Copy(m, fileConfig)
-		default:
-			return nil, fmt.Errorf("path %s is a special file (%v) and cannot be read as config", path, mode)
+		pathConfig, err := r.getConfigByInfo(info, path)
+		if err != nil {
+			return nil, fmt.Errorf("error reading config from path (%s): %v", path, err)
 		}
+
+		maps.Copy(configMap, pathConfig)
 	}
-	return NewSimpleReadResult(m), nil
+	return NewSimpleReadResult(configMap), nil
+}
+
+func (r *fileReader) getConfigByInfo(info fs.FileInfo, path string) (map[string]string, error) {
+	mode := info.Mode()
+	switch {
+	case mode.IsDir():
+		return r.readDirectory(path)
+	case mode.IsRegular():
+		return r.readFile(path)
+	default:
+		return nil, fmt.Errorf("path %s is a special file (%v) and cannot be read as config", path, mode)
+	}
 }
 
 func (r *fileReader) readDirectory(dir string) (map[string]string, error) {
 	dirConfig := make(map[string]string)
 
-	if err := fs.WalkDir(r.fileSystem, dir, func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(r.fileSystem, dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 		if d.IsDir() {
 			return nil
 		}
 
-		if !strings.HasSuffix(path, ".yml") && !strings.HasSuffix(path, ".yaml") {
+		// Support both .yml and .yaml
+		ext := strings.ToLower(filepath.Ext(path))
+		if ext != ".yml" && ext != ".yaml" {
 			return nil
 		}
 
 		fileConfig, err := r.readFile(path)
 		if err != nil {
-			return fmt.Errorf("error reading config file(%s): %v", path, err)
+			return err
 		}
 
 		maps.Copy(dirConfig, fileConfig)
-
 		return nil
-	}); err != nil {
-		return nil, fmt.Errorf("error walking config directory(%s): %v", dir, err)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error walking config directory (%s): %v", dir, err)
 	}
 
 	return dirConfig, nil
