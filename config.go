@@ -67,7 +67,7 @@ func Unmarshal(r Reader, target any) (map[string]string, error) {
 		return nil, fmt.Errorf("error reading: %v", err)
 	}
 	// if errors.Is(err, ErrInvalidFields) we want to continue
-	// because its possible that after helpers.FromMap, the
+	// because its possible that after helfromMap, the
 	// resulting target will have all required fields regardless
 
 	if err := fromMap(readResult.GetConfigMap(), target); err != nil {
