@@ -5,15 +5,15 @@ import (
 	"maps"
 )
 
-var _ Reader = (*configMux)(nil)
+var _ Reader = (*ConfigMux)(nil)
 
-type configMux struct {
+type ConfigMux struct {
 	readerFns []func(configMap map[string]string) Reader
 }
 
 // NewConfigMux creates a new config mux which can read from multiple readers
-func NewConfigMux(opts ...func(*configMux)) *configMux {
-	configMux := configMux{}
+func NewConfigMux(opts ...func(*ConfigMux)) *ConfigMux {
+	configMux := ConfigMux{}
 
 	for _, opt := range opts {
 		opt(&configMux)
@@ -22,7 +22,7 @@ func NewConfigMux(opts ...func(*configMux)) *configMux {
 	return &configMux
 }
 
-func (r *configMux) Read() (ReadResult, error) {
+func (r *ConfigMux) Read() (ReadResult, error) {
 	configMap, allDiagnostics := make(map[string]string), make(map[string]string)
 	for _, readerFn := range r.readerFns {
 		reader := readerFn(configMap)
@@ -37,8 +37,8 @@ func (r *configMux) Read() (ReadResult, error) {
 }
 
 // WithYAMLFileReader adds a yaml file reader to the config mux
-func WithYAMLFileReader(path string, opts ...func(*yamlFileReader)) func(*configMux) {
-	return func(configMux *configMux) {
+func WithYAMLFileReader(path string, opts ...func(*yamlFileReader)) func(*ConfigMux) {
+	return func(configMux *ConfigMux) {
 		configMux.readerFns = append(
 			configMux.readerFns,
 			func(_ map[string]string) Reader {
@@ -49,8 +49,8 @@ func WithYAMLFileReader(path string, opts ...func(*yamlFileReader)) func(*config
 }
 
 // WithEnvReader adds an environment variable reader to the config mux
-func WithEnvReader(opts ...func(*envReader)) func(*configMux) {
-	return func(configMux *configMux) {
+func WithEnvReader(opts ...func(*envReader)) func(*ConfigMux) {
+	return func(configMux *ConfigMux) {
 		configMux.readerFns = append(
 			configMux.readerFns,
 			func(_ map[string]string) Reader {
@@ -61,8 +61,8 @@ func WithEnvReader(opts ...func(*envReader)) func(*configMux) {
 }
 
 // WithBitwardenSecretReader adds a Bitwarden secret reader to the config mux
-func WithBitwardenSecretReader() func(*configMux) {
-	return func(configMux *configMux) {
+func WithBitwardenSecretReader() func(*ConfigMux) {
+	return func(configMux *ConfigMux) {
 		configMux.readerFns = append(configMux.readerFns, func(configMap map[string]string) Reader {
 			return NewBitwardenSecretReader(configMap)
 		})
@@ -78,8 +78,8 @@ func WithBitwardenSecretReader() func(*configMux) {
 // the same time as the mux.
 // WithCustomLazyReader is more powerful, but WithCustomReader is
 // simpler to use and syntactically terse
-func WithCustomReader(r Reader) func(*configMux) {
-	return func(configMux *configMux) {
+func WithCustomReader(r Reader) func(*ConfigMux) {
+	return func(configMux *ConfigMux) {
 		configMux.readerFns = append(
 			configMux.readerFns,
 			func(_ map[string]string) Reader { return r },
@@ -96,8 +96,8 @@ func WithCustomReader(r Reader) func(*configMux) {
 // For example, the BitwardenSecretReader would need to be initialized this way
 // because it expects a map of configs as an argument.
 // It uses this map to try to authenticate to Bitwarden
-func WithCustomLazyReader(fn func(configMap map[string]string) Reader) func(*configMux) {
-	return func(configMux *configMux) {
+func WithCustomLazyReader(fn func(configMap map[string]string) Reader) func(*ConfigMux) {
+	return func(configMux *ConfigMux) {
 		configMux.readerFns = append(configMux.readerFns, fn)
 	}
 }
