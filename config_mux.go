@@ -28,7 +28,7 @@ func (r *ConfigMux) Read() (ReadResult, error) {
 		reader := readerFn(configMap)
 		readerDiagnostics, err := Unmarshal(reader, &configMap)
 		if err != nil {
-			return nil, fmt.Errorf("error unmarshalling bitwarden secrets to map: %v", err)
+			return nil, fmt.Errorf("error unmarshalling from reader to map: %v", err)
 		}
 		maps.Copy(allDiagnostics, readerDiagnostics)
 	}
