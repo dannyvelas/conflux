@@ -10,6 +10,7 @@ type proxmox struct {
 	SSHPublicKeyPath     string `json:"ssh_public_key_path" required:"true"`
 	NodeCIDRAddress      string `json:"node_cidr_address" required:"true"`
 	GatewayAddress       string `json:"gateway_address" required:"true"`
+	AdminPassword        string `json:"gateway_address" required:"true" conflux:"proxmox_admin_password"`
 }
 
 // Create a config mux that reads from two YAML files, the environment, and Bitwarden
@@ -34,13 +35,28 @@ if errors.Is(err, conflux.ErrInvalidFields) {
 ## Why use this library instead of Viper, Koanf, etc?
 
 Use this library if you want something that:
-- Is light (751 SLOC).
+- Is light (~745 SLOC).
 - Supports reading from Bitwarden Secrets.
 - Has built-in validation. The `required` tag allows `conflux` to give you an exact report of the configurations that were found and missing. This report can be printed as a table for a user-friendly experience.
 - Is easily extensible. You can easily your own `Reader`s that read from any source you wish.
 - Has flexible initialization logic. `Reader`s can be initialized lazily. This allows us to initialize a `Reader` with a map of configs that have been read so far. The `BitwardenSecretReader` actually uses the configs found by `YAMLFileReader` and `EnvReader` to authenticate to Bitwarden.
 - Has flexible validation logic. If your struct has some specific validation rules, `conflux` will run them if you define a receiver with the following signature: `Validate(map[string]string) bool`.
 - Has flexible struct-filling logic. If your struct needs to fill-in additional fields after the required fields have been filled, `conflux` will fill those fields for you if you define a receiver with the following signature: `FillInKeys() error`.
+
+## Other features
+- If you are unmarshalling into a struct, and one of the field names (`FieldName`) doesn't match the name of its corresponding config key (`field_name`), you can use the `conflux` tag. This will tell `conflux` to set `FieldName` to the value of the config key `field_name`. In the example above, a value for `proxmox_admin_password` will be used to set the field `AdminPassword`.
+- First-class testing and mocking support. If you have a function with a `*ConfigMux` parameter, you can pass in a mock `*ConfigMux` like so:
+  ```
+  mockFS := fstest.MapFS{
+    "config/all.yml":     {Data: []byte("...")},
+    "config/proxmox.yml": {Data: []byte("...")},
+  }
+  mockEnv := []string{"SSH_PORT=9999", "SSH_PUBLIC_KEY_PATH=~/.ssh/env.pub"}
+  mockConfigMux := NewConfigMux(
+    WithYAMLFileReader("config/all.yml", WithPath("config/proxmox.yml"), WithFileSystem(mockFS)),
+    WithEnvReader(WithEnviron(mockEnv)),
+  )
+  ```
 
 ## Conflicts
 
