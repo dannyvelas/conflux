@@ -45,7 +45,7 @@ Use this library if you want something that:
 
 ## Other features
 - If you are unmarshalling into a struct, and one of the field names (`FieldName`) doesn't match the name of its corresponding config key (`field_name`), you can use the `conflux` tag. This will tell `conflux` to set `FieldName` to the value of the config key `field_name`. In the example above, a value for `proxmox_admin_password` will be used to set the field `AdminPassword`.
-- First-class testing and mocking support. If you have a function with a `*ConfigMux` parameter, you can pass in a mock `*ConfigMux` like so:
+- First-class testing and mocking support. If you have a function with a `*ConfigMux` parameter, you can create a mock `*ConfigMux` and pass it in as an argument:
   ```
   mockFS := fstest.MapFS{
     "config/all.yml":     {Data: []byte("...")},
