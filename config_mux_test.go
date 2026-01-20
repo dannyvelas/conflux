@@ -5,6 +5,8 @@ import (
 	"io/fs"
 	"testing"
 	"testing/fstest"
+
+	"github.com/dannyvelas/conflux/internal/client"
 )
 
 type testConfig struct {
@@ -149,7 +151,7 @@ func TestConfigMux_Error(t *testing.T) {
 			r := NewConfigMux(
 				WithYAMLFileReader("config/all.yml", WithPath("config/proxmox.yml"), WithFileSystem(tc.fs)),
 				WithEnvReader(WithEnviron(tc.env)),
-				WithBitwardenSecretReader(),
+				WithBitwardenSecretReader(WithProvider(client.NewBitwardenMockClientProvider(map[string]string{}, nil))),
 			)
 
 			target := testConfig{}

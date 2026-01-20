@@ -10,14 +10,22 @@ import (
 var _ Reader = (*bitwardenSecretReader)(nil)
 
 type bitwardenSecretReader struct {
-	mapReader mapReader
+	mapReader               mapReader
+	bitwardenClientProvider client.BitwardenProvider
 }
 
 // NewBitwardenSecretReader creates a new Bitwarden secret reader using the provided config map to authenticate to Bitwarden.
-func NewBitwardenSecretReader(configMap map[string]string) *bitwardenSecretReader {
-	return &bitwardenSecretReader{
-		mapReader: newMapReader(configMap),
+func NewBitwardenSecretReader(configMap map[string]string, opts ...func(*bitwardenSecretReader)) *bitwardenSecretReader {
+	bitwardenSecretReader := &bitwardenSecretReader{
+		mapReader:               newMapReader(configMap),
+		bitwardenClientProvider: client.NewBitwardenAPIClientProvider(),
 	}
+
+	for _, opt := range opts {
+		opt(bitwardenSecretReader)
+	}
+
+	return bitwardenSecretReader
 }
 
 func (r *bitwardenSecretReader) Read() (ReadResult, error) {
@@ -30,7 +38,7 @@ func (r *bitwardenSecretReader) Read() (ReadResult, error) {
 		return nil, fmt.Errorf("error unmarshalling bitwarden creds: %v", err)
 	}
 
-	bitwardenClient, err := client.NewBitwardenClient(
+	bitwardenClient, err := r.bitwardenClientProvider.NewBitwardenClient(
 		config.APIURL,
 		config.IdentityURL,
 		config.AccessToken,
@@ -47,4 +55,10 @@ func (r *bitwardenSecretReader) Read() (ReadResult, error) {
 	}
 
 	return NewDiagnosticReadResult(bitwardenSecrets, diagnostics), nil
+}
+
+func WithProvider(provider client.BitwardenProvider) func(*bitwardenSecretReader) {
+	return func(bitwardenSecretReader *bitwardenSecretReader) {
+		bitwardenSecretReader.bitwardenClientProvider = provider
+	}
 }

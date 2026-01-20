@@ -61,10 +61,10 @@ func WithEnvReader(opts ...func(*envReader)) func(*ConfigMux) {
 }
 
 // WithBitwardenSecretReader adds a Bitwarden secret reader to the config mux
-func WithBitwardenSecretReader() func(*ConfigMux) {
+func WithBitwardenSecretReader(opts ...func(*bitwardenSecretReader)) func(*ConfigMux) {
 	return func(configMux *ConfigMux) {
 		configMux.readerFns = append(configMux.readerFns, func(configMap map[string]string) Reader {
-			return NewBitwardenSecretReader(configMap)
+			return NewBitwardenSecretReader(configMap, opts...)
 		})
 	}
 }
