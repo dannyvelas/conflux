@@ -10,7 +10,7 @@ type proxmox struct {
 	SSHPublicKeyPath     string `json:"ssh_public_key_path" required:"true"`
 	NodeCIDRAddress      string `json:"node_cidr_address" required:"true"`
 	GatewayAddress       string `json:"gateway_address" required:"true"`
-	AdminPassword        string `json:"gateway_address" required:"true" conflux:"proxmox_admin_password"`
+	AdminPassword        string `json:"admin_password" required:"true" conflux:"proxmox_admin_password"`
 }
 
 // Create a config mux that reads from two YAML files, the environment, and Bitwarden
