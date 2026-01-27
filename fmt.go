@@ -9,38 +9,48 @@ import (
 // DiagnosticsToTable takes a diagnostic map and returns it as a pretty-printed formatted table
 // This is useful as a user-friendly report of missing and found configuration values
 func DiagnosticsToTable(data map[string]string) string {
-	// calculate the maximum length of the keys
-	maxKeyLen := 3 // Minimum width to fit the "KEY" header
-	for k := range data {
+	headerCol1 := "SUBJECT"
+	headerCol2 := "STATUS"
+
+	maxKeyLen := len(headerCol1)
+	maxValueLen := len(headerCol2)
+
+	for k, v := range data {
 		if len(k) > maxKeyLen {
 			maxKeyLen = len(k)
 		}
+		if len(v) > maxValueLen {
+			maxValueLen = len(v)
+		}
 	}
 
-	// create a data structure to pass both the map and the width
 	type tableContext struct {
-		Data  map[string]string
-		Width int
-		Line  string
+		Data       map[string]string
+		HeaderCol1 string
+		HeaderCol2 string
+		KeyWidth   int
+		ValueWidth int
+		Line       string
 	}
 
-	// create a horizontal line based on the dynamic width
-	line := strings.Repeat("-", maxKeyLen+20)
+	// "| " (2) + maxKeyLen + " | " (3) + maxValueLen + " " (1)
+	totalLineLength := maxKeyLen + maxValueLen + 6
+	line := strings.Repeat("-", totalLineLength)
 
 	ctx := tableContext{
-		Data:  data,
-		Width: maxKeyLen,
-		Line:  line,
+		Data:       data,
+		HeaderCol1: headerCol1,
+		HeaderCol2: headerCol2,
+		KeyWidth:   maxKeyLen,
+		ValueWidth: maxValueLen,
+		Line:       line,
 	}
 
-	// make template use the dynamic Width
-	// We use printf with a dynamic precision: %-*s
-	// The '*' tells printf to get the width from the next argument.
 	const tableTmpl = `{{ .Line }}
-| {{ printf "%-*s" .Width "KEY" }} | STATUS
+| {{ printf "%-*s" .KeyWidth .HeaderCol1 }} | {{ printf "%-*s" .ValueWidth .HeaderCol2 }} |
 {{ .Line }}
 {{- range $key, $val := .Data }}
-| {{ printf "%-*s" $.Width $key }} | {{ $val }}
+| {{ printf "%-*s" $.KeyWidth $key }} | {{ printf "%-*s" $.ValueWidth $val }} |
 {{- end }}
 {{ .Line }}
 `
