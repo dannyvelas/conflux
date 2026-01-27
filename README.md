@@ -58,6 +58,11 @@ Use this library if you want something that:
   )
   ```
 
+## Reasons NOT to use this library
+- You need something much more mature and battle-tested in production
+- Your configs aren't just string to string key-value pairs. Some values are nested objects or arrays.
+- You need out-of-the-box support for a bunch of config files like JSON/TOML, or data sources like S3/Vault.
+
 ## Conflicts
 
 - Sometimes there are two sources that define different values for the same configuration key. Conflux has the following rules for resolving conflicts:
