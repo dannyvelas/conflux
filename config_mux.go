@@ -9,6 +9,8 @@ var _ Reader = (*ConfigMux)(nil)
 
 type ConfigMux struct {
 	readerFns []func(configMap map[string]string) Reader
+
+	readCache *DiagnosticReadResult
 }
 
 // NewConfigMux creates a new config mux which can read from multiple readers
@@ -23,6 +25,10 @@ func NewConfigMux(opts ...func(*ConfigMux)) *ConfigMux {
 }
 
 func (r *ConfigMux) Read() (ReadResult, error) {
+	if r.readCache != nil {
+		return *r.readCache, nil
+	}
+
 	configMap, allDiagnostics := make(map[string]string), make(map[string]string)
 	for _, readerFn := range r.readerFns {
 		reader := readerFn(configMap)
@@ -33,7 +39,9 @@ func (r *ConfigMux) Read() (ReadResult, error) {
 		maps.Copy(allDiagnostics, readerDiagnostics)
 	}
 
-	return NewDiagnosticReadResult(configMap, allDiagnostics), nil
+	result := NewDiagnosticReadResult(configMap, allDiagnostics)
+	r.readCache = &result
+	return result, nil
 }
 
 // WithYAMLFileReader adds a yaml file reader to the config mux
