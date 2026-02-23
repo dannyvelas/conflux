@@ -72,9 +72,7 @@ Use this library if you want something that:
 
 ## Name
 
-I chose `conflux` for this library because it's Latin for "flowing together".
-
-This word kind-of describes the logic this library has of merging multiple configuration sources into a single source of truth.
+I wanted to name this library Confluence, because one of its definitions is: ["the flowing together of two or more streams"](https://www.merriam-webster.com/dictionary/confluence). This word kind-of describes the logic this library has of merging multiple configuration sources into a single source of truth. Unfortunately, [Confluence was already taken](https://www.atlassian.com/software/confluence). So I went with another word that has the same definition, [conflux](https://www.merriam-webster.com/dictionary/conflux).
 
 ## Installation
 
