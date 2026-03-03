@@ -83,7 +83,7 @@ func Unmarshal(r Reader, target any) (map[string]string, error) {
 
 	targetDiagnostics, err := validateStruct(target)
 	if err != nil && !errors.Is(err, ErrInvalidFields) {
-		return nil, fmt.Errorf("error unmarhsalling into config: %v", err)
+		return nil, fmt.Errorf("error unmarshalling into config: %v", err)
 	}
 
 	mergedDiagnostics := mergeMaps(readDiagnostics, targetDiagnostics)
